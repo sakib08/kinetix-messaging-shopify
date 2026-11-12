@@ -1,0 +1,179 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// Note that some adapters may set a maximum length for the String type by default, please ensure your strings are long
+// enough when changing adapters.
+// See https://www.prisma.io/docs/orm/reference/prisma-schema-reference#string for more information
+datasource db {
+  provider = "sqlite"
+  url      = "file:dev.sqlite"
+}
+
+model Session {
+  id            String    @id
+  shop          String
+  state         String
+  isOnline      Boolean   @default(false)
+  scope         String?
+  expires       DateTime?
+  accessToken   String
+  userId        BigInt?
+  firstName     String?
+  lastName      String?
+  email         String?
+  accountOwner  Boolean   @default(false)
+  locale        String?
+  collaborator  Boolean?  @default(false)
+  emailVerified Boolean?  @default(false)
+  refreshToken        String?
+  refreshTokenExpires DateTime?
+}
+
+model ShopSettings {
+  shop      String   @id
+  settings  String   @default("{}")
+  timezone  String   @default("UTC")
+  meta      String   @default("{}")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Department {
+  id          Int      @id @default(autoincrement())
+  shop        String
+  name        String
+  slug        String
+  description String   @default("")
+  createdAt   DateTime @default(now())
+
+  @@unique([shop, slug])
+  @@index([shop])
+}
+
+model Agent {
+  id            Int       @id @default(autoincrement())
+  shop          String
+  shopifyUserId String
+  name          String
+  email         String    @default("")
+  login         String    @default("")
+  role          String    @default("agent")
+  status        String    @default("offline")
+  lastSeenAt    DateTime?
+  createdAt     DateTime  @default(now())
+
+  @@unique([shop, shopifyUserId])
+  @@index([shop])
+}
+
+model AgentDepartment {
+  id           Int      @id @default(autoincrement())
+  shop         String
+  agentId      Int
+  departmentId Int
+  assignedAt   DateTime @default(now())
+
+  @@unique([agentId, departmentId])
+  @@index([shop])
+}
+
+model Contact {
+  id        Int      @id @default(autoincrement())
+  shop      String
+  name      String   @default("")
+  email     String   @default("")
+  phone     String   @default("")
+  handle    String   @default("")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([shop, email])
+  @@index([shop, phone])
+  @@index([shop, handle])
+}
+
+model Conversation {
+  id            Int       @id @default(autoincrement())
+  shop          String
+  channel       String
+  externalId    String    @default("")
+  contactId     Int?
+  contactName   String    @default("")
+  contactHandle String    @default("")
+  contactEmail  String    @default("")
+  contactPhone  String    @default("")
+  subject       String    @default("")
+  preview       String    @default("")
+  status        String    @default("open")
+  priority      String    @default("medium")
+  assigneeId    Int?
+  departmentId  Int?
+  aiStatus      String?
+  unreadCount   Int       @default(0)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  lastMessageAt DateTime?
+
+  @@index([shop, channel])
+  @@index([shop, contactId])
+  @@index([shop, status])
+}
+
+model Message {
+  id             Int      @id @default(autoincrement())
+  shop           String
+  conversationId Int
+  externalId     String   @default("")
+  senderType     String
+  senderId       Int?
+  senderName     String   @default("")
+  body           String
+  meta           String   @default("{}")
+  channel        String   @default("")
+  sentAt         DateTime @default(now())
+
+  @@index([shop, conversationId])
+  @@index([shop, externalId])
+}
+
+model KbDocument {
+  id         Int      @id @default(autoincrement())
+  shop       String
+  title      String
+  sourceType String   @default("manual")
+  sourceKey  String   @default("")
+  content    String
+  status     String   @default("active")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([shop, sourceType])
+  @@index([shop, sourceKey])
+}
+
+model KbChunk {
+  id         Int    @id @default(autoincrement())
+  shop       String
+  documentId Int
+  chunkIndex Int    @default(0)
+  content    String
+  embedding  String @default("")
+
+  @@index([shop, documentId])
+}
+
+model Upload {
+  id        Int      @id @default(autoincrement())
+  shop      String
+  url       String
+  name      String   @default("")
+  mime      String   @default("")
+  kind      String   @default("")
+  createdAt DateTime @default(now())
+
+  @@index([shop])
+}

@@ -1,0 +1,7 @@
+api_version = "2026-10"
+
+[[extensions]]
+name = "Kinetix live chat"
+handle = "kinetix-live-chat"
+type = "theme"
+uid = "7c2f1a4e-6b8d-4e3a-9f10-2d5c8a1b6e40"
